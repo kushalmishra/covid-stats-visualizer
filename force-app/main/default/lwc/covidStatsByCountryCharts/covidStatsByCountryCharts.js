@@ -131,8 +131,8 @@ export default class CovidStatsByCountryCharts extends LightningElement {
 		svg.append("path")
 			.datum(data)
 			.attr("fill", "none")
-			.attr("stroke", "steelblue")
-			.attr("stroke-width", 1.5)
+			.attr("stroke", this.lineColorMapper[className])
+			.attr("stroke-width", 2)
 			.attr("stroke-linejoin", "round")
 			.attr("stroke-linecap", "round")
 			.attr("d", line);
@@ -191,5 +191,14 @@ export default class CovidStatsByCountryCharts extends LightningElement {
 				value: country[type],
 			}
 		})
+	}
+
+	get lineColorMapper() {
+		return {
+			countryChartConfirmed: "rgb(54, 6, 212)",
+			countryChartRecovered: "rgb(3, 143, 31)",
+			countryChartDeaths: "rgb(252, 19, 15)",
+			countryChartActive: "rgb(212, 136, 4)"
+		}
 	}
 }
