@@ -1,0 +1,18 @@
+<template>
+    <div if:true={isLoading} class="slds-is-relative hl">
+        <lightning-spinner
+            variant="brand"
+            size="small"
+            alternative-text="Loading Map. Please hold on.."
+        ></lightning-spinner>
+    </div>
+    <div if:false={isLoading} class="slds-var-m-around_medium">
+        <svg class="mapColorScale" lwc:dom="manual"></svg>
+        <svg
+            class="covidWorldMap"
+            width={width}
+            height={height}
+            lwc:dom="manual"
+        ></svg>
+    </div>
+</template>
