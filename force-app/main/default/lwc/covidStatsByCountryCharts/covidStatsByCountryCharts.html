@@ -1,0 +1,52 @@
+<template>
+    <lightning-layout>
+        <lightning-layout-item padding="around-small" class="slds-size--1-of-4">
+            <lightning-combobox
+                name="progress"
+                label="Country"
+                value={countryValue}
+                placeholder="Select Country"
+                options={countryOptions}
+                onchange={handleCountryChange}>
+            </lightning-combobox>
+        </lightning-layout-item>
+    </lightning-layout>
+    <lightning-layout multiple-rows if:true={chartsRendered}>
+        <lightning-layout-item size="6">
+            <lightning-badge label="Confirmed Cases" class="slds-align_absolute-center slds-m-horizontal_xx-large slds-m-top_small"></lightning-badge>
+            <svg
+                class="countryChartConfirmed"
+                width={width}
+                height={height}
+                lwc:dom="manual"
+            ></svg>
+        </lightning-layout-item>
+        <lightning-layout-item size="6">
+            <lightning-badge label="Active Cases" class="slds-align_absolute-center slds-m-horizontal_xx-large slds-m-top_small"></lightning-badge>
+            <svg
+                class="countryChartActive"
+                width={width}
+                height={height}
+                lwc:dom="manual"
+            ></svg>
+        </lightning-layout-item>
+        <lightning-layout-item size="6">
+            <lightning-badge label="Recovered Cases" class="slds-align_absolute-center slds-m-horizontal_xx-large slds-m-top_small"></lightning-badge>
+            <svg
+                class="countryChartRecovered"
+                width={width}
+                height={height}
+                lwc:dom="manual"
+            ></svg>
+        </lightning-layout-item>
+        <lightning-layout-item size="6">
+            <lightning-badge label="Deaths" class="slds-align_absolute-center slds-m-horizontal_xx-large slds-m-top_small"></lightning-badge>
+            <svg
+                class="countryChartDeaths"
+                width={width}
+                height={height}
+                lwc:dom="manual"
+            ></svg>
+        </lightning-layout-item>
+    </lightning-layout>
+</template>

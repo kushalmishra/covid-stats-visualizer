@@ -1,0 +1,17 @@
+.overlay {
+    fill: none;
+    pointer-events: all;
+}
+
+.focus circle {
+    fill: steelblue;
+}
+
+.focus text {
+    font-size: 10px;
+}
+
+.tooltip {
+    fill: white;
+    stroke: #000;
+}
