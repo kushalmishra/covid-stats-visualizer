@@ -3,16 +3,39 @@
         <lightning-spinner
             variant="brand"
             size="small"
-            alternative-text="Loading Map. Please hold on.."
-        ></lightning-spinner>
+            alternative-text="Loading Map. Please hold on..">
+        </lightning-spinner>
     </div>
-    <div if:false={isLoading} class="slds-var-m-around_medium">
-        <svg class="mapColorScale" lwc:dom="manual"></svg>
-        <svg
-            class="covidWorldMap"
-            width={width}
-            height={height}
-            lwc:dom="manual"
-        ></svg>
+    <div if:false={isLoading} class="slds-var-m-horizontal_medium">
+        <div class="slds-clearfix">
+            <lightning-input type="toggle"
+                class="slds-float_right"
+                label="Mode"
+                message-toggle-active="Map"
+                message-toggle-inactive="Table"
+                checked={mapModeChecked}
+                onchange={handleModeChange}>
+            </lightning-input>
+        </div>
+        <template if:true={mapModeChecked}>
+            <svg class="mapColorScale" lwc:dom="manual"></svg>
+            <svg
+                class="covidWorldMap"
+                width={width}
+                height={height}
+                lwc:dom="manual">
+            </svg>
+        </template>
+        <template if:false={mapModeChecked}>
+            <lightning-datatable
+                columns={columns}
+                key-field="Slug"
+                data={records}
+                sorted-by={sortedBy}
+                sorted-direction={sortedDirection}
+                onsort={handleSort}
+                hide-checkbox-column>
+            </lightning-datatable>
+        </template>
     </div>
 </template>

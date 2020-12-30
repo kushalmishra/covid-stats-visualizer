@@ -6,12 +6,20 @@ import { RENAMED_COUNTRIES } from './data';
 import jsonConfigData from '@salesforce/resourceUrl/worldConfig';
 
 export default class CovidWorldDistributionMap extends LightningElement {
-	covidData;
-	world;
+
 	scriptLoaded = false;
 	height;
 	width = 900;
 	isLoading = true;
+	mapModeChecked = true;
+	records = [];
+	columns = [];
+	sortedBy = "Country";
+	sortedDirection = "asc";
+
+	_covidData;
+	_worldConfig;
+	_covidSummaryApiData;
 
 	renderedCallback() {
 		if (!this.scriptLoaded) {
@@ -20,33 +28,61 @@ export default class CovidWorldDistributionMap extends LightningElement {
 				loadScript(this, D3 + '/d3.min.js'),
 				loadScript(this, topoJSON + '/topojson-client.min.js')
 			])
+			.then(() => {
+				this.scriptLoaded = true;
+			})
 			.catch((error) => {
 				console.log("Error:", error);
+			})
+			.finally(() => {
+				this.isLoading = false;
 			});
-			this.scriptLoaded = true;
 		}
 
-		this.prepareAndDrawMap();
-		this.isLoading = false;
+		if(this.mapModeChecked) {
+			this.prepareAndDrawMap();
+		}
+	}
+
+	handleModeChange() {
+		this.mapModeChecked = !this.mapModeChecked;
+	}
+
+	handleSort(event) {
+		const { fieldName, sortDirection } = event.detail;
+		const dataToSort = [...this.records];
+		this.sortedBy = fieldName;
+		this.sortedDirection = sortDirection;
+		dataToSort.sort(this.sortDataBy(fieldName, sortDirection));
+		this.records = dataToSort;
 	}
 
 	async prepareAndDrawMap() {
-		let request = new XMLHttpRequest();
-		request.open("GET", jsonConfigData, false);
-		request.send(null);
+		if(!this._worldConfig) {
+			let request = new XMLHttpRequest();
+			request.open("GET", jsonConfigData, false);
+			request.send(null);
+			this._worldConfig = JSON.parse(request.responseText);
+		}
 
-		this.worldConfig = JSON.parse(request.responseText);
-		const covidSummaryData = await fetch('https://api.covid19api.com/summary', {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
-				}
-			})
-			.then((response) => {
-				return response.json();
-			});
-		this.prepareData(covidSummaryData);
-		this.drawMap();
+		if(!(this._covidSummaryApiData && this._covidSummaryApiData.length > 0)) {
+			this._covidSummaryApiData = await fetch('https://api.covid19api.com/summary', {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					}
+				})
+				.then((response) => {
+					return response.json();
+				});
+		}
+
+		if(this._covidSummaryApiData && this._covidSummaryApiData.Countries && this._covidSummaryApiData.Countries.length > 0) {
+			this.columns = this.prepareColumns();
+			this.records = this._covidSummaryApiData.Countries;
+			this.prepareData(this._covidSummaryApiData);
+			this.drawMap();
+		}
 	}
 
 	drawMap() {
@@ -55,9 +91,9 @@ export default class CovidWorldDistributionMap extends LightningElement {
 		const projection = d3.geoEqualEarth(),
 			path = d3.geoPath(projection),
 			outline = ({type: "Sphere"}),
-			countries = topojson.feature(this.worldConfig, this.worldConfig.objects.countries),
+			countries = topojson.feature(this._worldConfig, this._worldConfig.objects.countries),
 			color = d3.scaleSequentialSqrt()
-				.domain(d3.extent(Array.from(this.covidData.values())))
+				.domain(d3.extent(Array.from(this._covidData.values())))
 				.interpolator(d3.interpolateYlOrRd)
 				.unknown("#ccc");
 		
@@ -88,14 +124,14 @@ export default class CovidWorldDistributionMap extends LightningElement {
 			.selectAll("path")
 			.data(countries.features)
 			.join("path")
-			.attr("fill", d => color(this.covidData.get(d.properties.name)))
+			.attr("fill", d => color(this._covidData.get(d.properties.name)))
 			.attr("d", path)
 			.append("title")
-			.text(d => `${d.properties.name} ${this.covidData.has(d.properties.name) ? this.covidData.get(d.properties.name).toLocaleString() : "N/A"}`);
+			.text(d => `${d.properties.name} ${this._covidData.has(d.properties.name) ? this._covidData.get(d.properties.name).toLocaleString() : "N/A"}`);
 	  
 		// creates country borders
 		g.append("path")
-			.datum(topojson.mesh(this.worldConfig, this.worldConfig.objects.countries, (a, b) => a !== b))
+			.datum(topojson.mesh(this._worldConfig, this._worldConfig.objects.countries, (a, b) => a !== b))
 			.attr("fill", "none")
 			.attr("stroke", "white")
 			.attr("stroke-linejoin", "round")
@@ -174,9 +210,68 @@ export default class CovidWorldDistributionMap extends LightningElement {
 		return canvas;
 	}
 
+	sortDataBy(field, sortDirection) {
+		// eslint-disable-next-line no-confusing-arrow
+		const key = (a) =>
+			typeof a[field] === 'string' ? a[field].toLowerCase() : a[field];
+		const reverse = sortDirection === 'asc' ? 1 : -1;
+		return (a, b) => {
+			const x = key(a) || '';
+			const y = key(b) || '';
+			return reverse * ((x > y) - (y > x));
+		};
+	};
+
 	prepareData(data) {
-		this.covidData = new Map(data.Countries.map(country => 
+		this._covidData = new Map(data.Countries.map(country => 
 			new Array(RENAMED_COUNTRIES.has(country.Country) ? RENAMED_COUNTRIES.get(country.Country) : country.Country, country.TotalConfirmed)
 		));
+	}
+
+	prepareColumns() {
+		return [
+			{
+				label: "Country",
+				type: 'text',
+				fieldName: "Country",
+				sortable: true,
+			},
+			{
+				label: "New Confirmed",
+				type: 'text',
+				fieldName: "NewConfirmed",
+				sortable: true,
+			},
+			{
+				label: "Total Confirmed",
+				type: 'text',
+				fieldName: "TotalConfirmed",
+				sortable: true,
+			},
+			{
+				label: "New Recovered",
+				type: 'text',
+				fieldName: "NewRecovered",
+				sortable: true,
+			},
+			{
+				label: "Total Recovered",
+				type: 'text',
+				fieldName: "TotalRecovered",
+				sortable: true,
+			},
+			{
+				label: "New Deaths",
+				type: 'text',
+				fieldName: "NewDeaths",
+				sortable: true,
+			},
+			{
+				label: "Total Deaths",
+				type: 'text',
+				fieldName: "TotalDeaths",
+				sortable: true,
+			},
+		];
 	}
 }

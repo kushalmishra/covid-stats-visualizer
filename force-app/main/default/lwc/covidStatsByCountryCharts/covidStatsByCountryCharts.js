@@ -54,7 +54,7 @@ export default class CovidStatsByCountryCharts extends LightningElement {
 				return response.json();
 			});
 
-		covidCountries.sort((a,b) => (a.Country > b.Country) ? 1 : ((b.Country > a.Country) ? -1 : 0));;
+		covidCountries.sort((a,b) => (a.Country > b.Country) ? 1 : ((b.Country > a.Country) ? -1 : 0));
 		this.countryOptions = covidCountries.map((country) => {
 			return {
 				label: country.Country,
