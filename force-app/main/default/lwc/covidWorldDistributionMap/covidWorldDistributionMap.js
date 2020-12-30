@@ -9,13 +9,17 @@ export default class CovidWorldDistributionMap extends LightningElement {
 
 	scriptLoaded = false;
 	height;
-	width = 900;
+	width = 1100;
 	isLoading = true;
 	mapModeChecked = true;
 	records = [];
 	columns = [];
 	sortedBy = "Country";
 	sortedDirection = "asc";
+	confirmedCount = 'N/A';
+	activeCount = 'N/A';
+	recoveredCount = 'N/A';
+	deathCount = 'N/A';
 
 	_covidData;
 	_worldConfig;
@@ -78,6 +82,11 @@ export default class CovidWorldDistributionMap extends LightningElement {
 		}
 
 		if(this._covidSummaryApiData && this._covidSummaryApiData.Countries && this._covidSummaryApiData.Countries.length > 0) {
+			const formatCount = window.d3.format(",");
+			this.confirmedCount = formatCount(this._covidSummaryApiData.Global.TotalConfirmed);
+			this.activeCount = formatCount(this._covidSummaryApiData.Global.TotalConfirmed - (this._covidSummaryApiData.Global.TotalRecovered + this._covidSummaryApiData.Global.TotalDeaths));
+			this.recoveredCount = formatCount(this._covidSummaryApiData.Global.TotalRecovered);
+			this.deathCount = formatCount(this._covidSummaryApiData.Global.TotalDeaths);
 			this.columns = this.prepareColumns();
 			this.records = this._covidSummaryApiData.Countries;
 			this.prepareData(this._covidSummaryApiData);
@@ -273,5 +282,14 @@ export default class CovidWorldDistributionMap extends LightningElement {
 				sortable: true,
 			},
 		];
+	}
+
+	get colorMapper() {
+		return {
+			confirmed: "rgb(54, 6, 212)",
+			recovered: "rgb(3, 143, 31)",
+			deaths: "rgb(252, 19, 15)",
+			active: "rgb(212, 136, 4)"
+		}
 	}
 }

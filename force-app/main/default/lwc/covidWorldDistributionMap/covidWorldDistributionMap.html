@@ -7,16 +7,32 @@
         </lightning-spinner>
     </div>
     <div if:false={isLoading} class="slds-var-m-horizontal_medium">
-        <div class="slds-clearfix">
-            <lightning-input type="toggle"
-                class="slds-float_right"
-                label="Mode"
-                message-toggle-active="Map"
-                message-toggle-inactive="Table"
-                checked={mapModeChecked}
-                onchange={handleModeChange}>
-            </lightning-input>
-        </div>
+        <lightning-layout>
+            <lightning-layout-item padding="around-small" class="slds-size--1-of-5">
+                <c-total-card label="Confirmed" value={confirmedCount} count-color={colorMapper.confirmed}></c-total-card>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small" class="slds-size--1-of-5">
+                <c-total-card label="Active" value={activeCount} count-color={colorMapper.active}></c-total-card>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small" class="slds-size--1-of-5">
+                <c-total-card label="Recovered" value={recoveredCount} count-color={colorMapper.recovered}></c-total-card>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small" class="slds-size--1-of-5">
+                <c-total-card label="Deaths" value={deathCount} count-color={colorMapper.deaths}></c-total-card>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small" class="slds-size--1-of-5">
+                <div class="slds-clearfix">
+                    <lightning-input type="toggle"
+                        class="slds-float_right"
+                        label="Mode"
+                        message-toggle-active="Map"
+                        message-toggle-inactive="Table"
+                        checked={mapModeChecked}
+                        onchange={handleModeChange}>
+                    </lightning-input>
+                </div>
+            </lightning-layout-item>
+        </lightning-layout>
         <template if:true={mapModeChecked}>
             <svg class="mapColorScale" lwc:dom="manual"></svg>
             <svg
