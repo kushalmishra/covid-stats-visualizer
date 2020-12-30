@@ -1,6 +1,6 @@
 <template>
     <lightning-layout>
-        <lightning-layout-item padding="around-small" class="slds-size--1-of-4">
+        <lightning-layout-item padding="around-small" class="slds-size--1-of-5">
             <lightning-combobox
                 name="progress"
                 label="Country"
@@ -10,6 +10,20 @@
                 onchange={handleCountryChange}>
             </lightning-combobox>
         </lightning-layout-item>
+        <template if:true={chartsRendered}>
+            <lightning-layout-item padding="around-small" class="slds-size--1-of-5">
+                <c-total-card label="Confirmed" value={confirmedCount} count-color={lineColorMapper.countryChartConfirmed}></c-total-card>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small" class="slds-size--1-of-5">
+                <c-total-card label="Active" value={activeCount} count-color={lineColorMapper.countryChartActive}></c-total-card>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small" class="slds-size--1-of-5">
+                <c-total-card label="Recovered" value={recoveredCount} count-color={lineColorMapper.countryChartRecovered}></c-total-card>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small" class="slds-size--1-of-5">
+                <c-total-card label="Deaths" value={deathCount} count-color={lineColorMapper.countryChartDeaths}></c-total-card>
+            </lightning-layout-item>
+        </template>
     </lightning-layout>
     <lightning-layout multiple-rows if:true={chartsRendered}>
         <lightning-layout-item size="6">

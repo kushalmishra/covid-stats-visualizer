@@ -10,6 +10,10 @@ export default class CovidStatsByCountryCharts extends LightningElement {
 	height = 300;
 	width = 500
 	chartsRendered = false;
+	confirmedCount = 'N/A';
+	activeCount = 'N/A';
+	recoveredCount = 'N/A';
+	deathCount = 'N/A';
 
 	async renderedCallback() {
 		if (!this.scriptLoaded) {
@@ -71,8 +75,14 @@ export default class CovidStatsByCountryCharts extends LightningElement {
 				return response.json();
 			});
 
-		if(covidData && covidData.length > 0) {
+		let size = covidData.length;
+		if(covidData && size > 0) {
+			const formatCount = window.d3.format(",");
 			this.prepareCountryCharts(covidData);
+			this.confirmedCount = formatCount(covidData[size-1].Confirmed);
+			this.activeCount = formatCount(covidData[size-1].Active);
+			this.recoveredCount = formatCount(covidData[size-1].Recovered);
+			this.deathCount = formatCount(covidData[size-1].Deaths);
 		}
 	}
 

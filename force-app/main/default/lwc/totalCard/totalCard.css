@@ -1,0 +1,4 @@
+.totalCard {
+    box-shadow: var(--lwc-shadowDrag);
+    border-radius: var(--lwc-borderRadiusMedium);
+}
