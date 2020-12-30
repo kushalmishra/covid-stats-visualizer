@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CspTrustedSite xmlns="http://soap.sforce.com/2006/04/metadata">
+    <context>LEX</context>
+    <description>Trusted site for covid statistics api</description>
+    <endpointUrl>http://api.covid19api.com</endpointUrl>
+    <isActive>true</isActive>
+    <isApplicableToConnectSrc>true</isApplicableToConnectSrc>
+</CspTrustedSite>
