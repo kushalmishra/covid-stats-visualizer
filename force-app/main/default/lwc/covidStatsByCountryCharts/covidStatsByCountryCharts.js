@@ -10,10 +10,15 @@ export default class CovidStatsByCountryCharts extends LightningElement {
 	height = 300;
 	width = 500
 	chartsRendered = false;
+	calendarModeChecked = false;
 	confirmedCount = 'N/A';
 	activeCount = 'N/A';
 	recoveredCount = 'N/A';
 	deathCount = 'N/A';
+	covidCountryData = [];
+	confirmedMax = 0;
+	recoveredMax = 0;
+	deathMax = 0;
 
 	async renderedCallback() {
 		if (!this.scriptLoaded) {
@@ -22,25 +27,36 @@ export default class CovidStatsByCountryCharts extends LightningElement {
 				loadScript(this, D3 + '/d3.min.js'),
 			])
 			.then(() => {
-				this.prepareCountryOptions();
+				this.scriptLoaded = true;
 			})
 			.catch((error) => {
 				console.log("Error:", error);
 			});
-			this.scriptLoaded = true;
+		}
+
+		if(!(this.countryOptions.length > 0)) {
+			await this.prepareCountryOptions();
 		}
 
 		this.isLoading = false;
 	}
 
-	handleCountryChange(event) {
+	async handleCountryChange(event) {
 		const countryVal = event.detail.value;
 		if(countryVal && countryVal.length > 0) {
 			this.chartsRendered = false;
 			this.countryValue = countryVal;
-			this.drawCountryLineChart(this.countryValue);
+			if(this.calendarModeChecked) {
+				await this.prepareCalendarData(this.countryValue);
+			} else {
+				await this.drawCountryLineChart(this.countryValue);
+			}
 			this.chartsRendered = true;
 		}
+	}
+
+	handleModeChange() {
+		this.calendarModeChecked = !this.calendarModeChecked;
 	}
 
 	async prepareCountryOptions() {
@@ -62,6 +78,63 @@ export default class CovidStatsByCountryCharts extends LightningElement {
 			}
 		});
 		this.countryValue = this.countryOptions[0].value;
+	}
+
+	async prepareCalendarData(country) {
+		let covidData = await fetch(`https://api.covid19api.com/country/${country}`, {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					}
+				})
+				.then((response) => {
+					return response.json();
+				});
+		let size = covidData.length;
+		if(covidData && size > 0) {
+			const formatCount = window.d3.format(",");
+			this.confirmedCount = formatCount(covidData[size-1].Confirmed);
+			this.activeCount = formatCount(covidData[size-1].Active);
+			this.recoveredCount = formatCount(covidData[size-1].Recovered);
+			this.deathCount = formatCount(covidData[size-1].Deaths);
+		}
+		this.covidCountryData = this.prepareData(covidData);
+	}
+
+	prepareData(data) {
+		var confirmedCases = 0;
+		var recoveredCases = 0;
+		var deathCases = 0;
+		let recordsByYear = new Map();
+		var normalisedData = [];
+
+		data.forEach(x => {
+			let record = {
+				...x,
+				confirmToday: x.Confirmed - confirmedCases,
+				recoverdToday: x.Recovered - recoveredCases,
+				deathToday: x.Deaths - deathCases,
+				year: new Date(x.Date).getFullYear(),
+			};
+
+			confirmedCases = x.Confirmed;
+			recoveredCases = x.Recovered;
+			deathCases = x.Deaths;
+			this.confirmedMax = record.confirmToday > this.confirmedMax? record.confirmToday : this.confirmedMax;
+			this.recoveredMax = record.recoverdToday > this.recoveredMax? record.recoverdToday : this.recoveredMax;
+			this.deathMax = record.deathToday > this.deathMax? record.deathToday : this.deathMax;
+
+			if(!recordsByYear.has(record.year)) {
+				recordsByYear.set(record.year, new Array(record));
+			} else {
+				recordsByYear.get(record.year).push(record);
+			}
+		});
+
+		for (const [key, value] of recordsByYear.entries()) {
+			normalisedData.push(new Array(key, value));
+		}
+		return normalisedData;
 	}
 
 	async drawCountryLineChart(country) {
@@ -210,5 +283,13 @@ export default class CovidStatsByCountryCharts extends LightningElement {
 			countryChartDeaths: "rgb(252, 19, 15)",
 			countryChartActive: "rgb(212, 136, 4)"
 		}
+	}
+
+	get showCharts() {
+		return this.chartsRendered && !this.calendarModeChecked;
+	}
+
+	get showCalendar() {
+		return this.chartsRendered && this.calendarModeChecked;
 	}
 }

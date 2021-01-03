@@ -1,14 +1,26 @@
 <template>
     <lightning-layout>
         <lightning-layout-item padding="around-small" class="slds-size--1-of-5">
-            <lightning-combobox
-                name="progress"
-                label="Country"
-                value={countryValue}
-                placeholder="Select Country"
-                options={countryOptions}
-                onchange={handleCountryChange}>
-            </lightning-combobox>
+            <div>
+                <lightning-input type="toggle"
+                    label="Mode"
+                    message-toggle-active="Calendar"
+                    message-toggle-inactive="Chart"
+                    checked={mapModeChecked}
+                    onchange={handleModeChange}>
+                </lightning-input>
+            </div>
+            <div>
+                <lightning-combobox
+                    class="slds-p-top_x-small"
+                    name="progress"
+                    label="Country"
+                    value={countryValue}
+                    placeholder="Select Country"
+                    options={countryOptions}
+                    onchange={handleCountryChange}>
+                </lightning-combobox>
+            </div>
         </lightning-layout-item>
         <template if:true={chartsRendered}>
             <lightning-layout-item padding="around-small" class="slds-size--1-of-5">
@@ -25,7 +37,15 @@
             </lightning-layout-item>
         </template>
     </lightning-layout>
-    <lightning-layout multiple-rows if:true={chartsRendered}>
+    <template if:true={showCalendar}>
+        <lightning-badge label="Confirmed Cases" class="slds-align_absolute-center slds-m-horizontal_xx-large slds-m-top_small"></lightning-badge>
+        <c-calendar-chart years-data={covidCountryData} fill-by="confirmToday" color="interpolateBlues" max-scale={confirmedMax}></c-calendar-chart>
+        <lightning-badge label="Recovered Cases" class="slds-align_absolute-center slds-m-horizontal_xx-large slds-m-top_small"></lightning-badge>
+        <c-calendar-chart years-data={covidCountryData} fill-by="recoverdToday" color="interpolateGreens" max-scale={recoveredMax}></c-calendar-chart>
+        <lightning-badge label="Deaths" class="slds-align_absolute-center slds-m-horizontal_xx-large slds-m-top_small"></lightning-badge>
+        <c-calendar-chart years-data={covidCountryData} fill-by="deathToday" color="interpolateReds" max-scale={deathMax}></c-calendar-chart>
+    </template>
+    <lightning-layout multiple-rows if:true={showCharts}>
         <lightning-layout-item size="6">
             <lightning-badge label="Confirmed Cases" class="slds-align_absolute-center slds-m-horizontal_xx-large slds-m-top_small"></lightning-badge>
             <svg
