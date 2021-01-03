@@ -1,4 +1,4 @@
-# Covid Statistics
+# Covid Statistics Visualizer
  
 This repository contains Salesforce SFDX based project for visualising statistics related to Corona virus pandemic throughout the world. D3 is being used as thrid party library with Lightning Web Components to achieve visualization of different charts and world map. Data is fetched at real time using [Coronavirus Covid19 API](https://api.covid19api.com/)
 
