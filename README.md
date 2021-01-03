@@ -5,6 +5,8 @@ This repository contains Salesforce SFDX based project for visualising statistic
 # Glance
 ![Covid Stats World Map](/force-app/main/default/documents/screenshots/worldMap.png "Global Distribution of Covid Cases")
 
+![Covid Stats Country Calendar Charts](/force-app/main/default/documents/screenshots/calendarCharts.png "Charts for country showing daily Covid cases")
+
 ![Covid Stats Country Charts](/force-app/main/default/documents/screenshots/countryCharts.png "Charts for country showing progress in Covid cases")
 
 ![Covid Stats World Table](/force-app/main/default/documents/screenshots/statsTable.PNG "Table highlighting Covid cases for each country")
